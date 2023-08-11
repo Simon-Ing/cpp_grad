@@ -5,13 +5,9 @@
 #include <string>
 #include <functional>
 
-enum class Op {
-    add, mul, div, neg, sin, cos, exp, log, pow, none
-};
-
 class Value {
 public:
-  Value(double data, std::vector<Value&> children, Op op=Op::none);
+  Value(double data, std::vector<Value> children={}, const std::string& op="");
   // Value(const Value& other);
 
   void backward();
@@ -24,10 +20,18 @@ public:
 
   std::string get() const;
 
-  Value operator+(Value& other);
-  Value operator*(Value& other);
-  Value& operator=(Value other);
-  // friend Value operator*(Value& a, Value& b);
+  std::vector<std::string> printTreeHelper() const;
+  // void printTree() const;
+
+  friend Value operator+(Value& a, Value& b);
+  friend Value operator+(Value& a, Value&& b) { return a + b; }
+  friend Value operator+(Value&& a, Value& b) { return a + b; }
+  friend Value operator+(Value&& a, Value&& b) { return a + b; }
+
+  friend Value operator*(Value& a, Value& b);
+  friend Value operator*(Value& a, Value&& b) { return a * b; }
+  friend Value operator*(Value&& a, Value& b) { return a * b; }
+  friend Value operator*(Value&& a, Value&& b) { return a * b; }
   // friend Value operator*(double a, Value& b);
   // friend Value operator*(Value& a, double b);
   // friend Value operator-(Value& a); // Negation
@@ -38,10 +42,9 @@ public:
 
 private:
   double data_;
-  std::vector<Value&> children_;
-  Op op_;
+  std::vector<Value> children_;
+  std::string op_;
   double grad_;
   std::function<void()> backward_;
   std::string tag_;
-
 };
